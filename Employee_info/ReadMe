@@ -1,0 +1,16 @@
+此程序支持一下类型增删查改：
+    查询：
+    select name,age from staff_table where age > 22
+    select name,age from staff_table where age < 22
+    select  * from staff_table
+　　select  * from staff_table where dept = "IT"
+    select  * from staff_table where enroll_date like "2013"
+    增加：
+    insert into staff_table (name,age,phone,dept) values (Harvey Wang,18,13022223222,python)
+    修改：
+    update staff_table set dept="IT" where dept = "Market"
+    删除：
+    输入数字id即可
+
+注意：
+ 关键词必须小写
