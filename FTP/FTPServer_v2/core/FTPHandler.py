@@ -14,6 +14,7 @@ class FTPHandler(socketserver.BaseRequestHandler):
         self.name = None
         self.mydbHelper = None
         # self.mydbHelper = dbHelper()
+        self.homepath = None
 
     def handle(self):
         while True:
@@ -36,7 +37,8 @@ class FTPHandler(socketserver.BaseRequestHandler):
         print(acc_info['username'], acc_info['password'])
         if acc_info:
             if username == acc_info['username'] and password == acc_info['password']:
-                if os.path.exists(acc_info['home']):
+                self.homepath = '%s%s' % (settings.BASE_DIR, acc_info['home'])
+                if os.path.exists(self.homepath):
                     print('home path 已存在')
                     pass
                 else:
@@ -44,7 +46,7 @@ class FTPHandler(socketserver.BaseRequestHandler):
                     print('创建成功')
                 print('%s登录成功。。。', username)
                 self.acc_info = acc_info
-                self.request.send('OK'.encode('utf-8'))
+                self.request.send(('OK|%s' % self.homepath).encode('utf-8'))
             else:
                 self.request.send('ERR'.encode('utf-8'))
         else:
@@ -65,6 +67,8 @@ class FTPHandler(socketserver.BaseRequestHandler):
                 self.request.send(data)
                 tmp_filesize += 1024
             f.close()
+        else:
+            self.request.send('file in not exist|0'.encode('utf-8'))
 
     def put(self, msg_data):
         filename = msg_data[1]
@@ -94,9 +98,39 @@ class FTPHandler(socketserver.BaseRequestHandler):
 
     def ls(self, msg_data):
         path = msg_data[1]
+        path_r = '%s/%s' % (self.homepath, path)
+        print(path_r)
+        #print(path, path_r)
+        if str(self.acc_info['home']) in str(path):
+            print('ls %s' % path)
+            rst = os.popen('ls %s' % path).read()
+            print(rst)
+        elif os.path.exists(path_r):
+            rst = os.popen('ls %s' % path).read()
+            print(rst)
+        else:
+            rst = 'Permission denied...'
+            print(rst)
+        if len(rst) == 0:
+            rst = 'cmd in not output'
+        self.request.send(rst.encode('utf-8'))
+        return rst
 
     def cd(self, msg_data):
-        pass
+        path = msg_data[1]
+        path_r = '%s/%s' % (self.homepath, path)
+        print(path)
+        print(path_r)
+        if str(self.acc_info['home']) in str(path):
+            data = os.popen('cd %s' % path).read()
+            rst = '%s|%s' % ('OK', path)
+        elif os.path.exists(path_r):
+            data = os.popen('cd %s' % path_r).read()
+            rst = '%s|%s' % ('OK', path_r)
+        else:
+            rst = 'Permission denied...'
+        self.request.send(rst.encode('utf-8'))
+        return rst
 
 #
 # server = socketserver.ThreadingTCPServer(('localhost', 10000), FTPHandle)

@@ -12,5 +12,5 @@ sys.path.append(BASE_DIR)
 from core import FTPHandler
 
 if __name__ == '__main__':
-    server = socketserver.ThreadingTCPServer(('127.0.0.1', 10000), FTPHandler.FTPHandler)
+    server = socketserver.ThreadingTCPServer(('0.0.0.0', 10000), FTPHandler.FTPHandler)
     server.serve_forever()

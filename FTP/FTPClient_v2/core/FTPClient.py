@@ -25,8 +25,8 @@ class FtpClient(object):
                 auth_info = 'authenticate|%s|%s' % (username, password)
                 self.client.send(auth_info.encode('utf-8'))
                 rst = self.client.recv(1024).decode('utf-8')
-                if rst == 'OK':
-                    self.current_path = '/home/%s' % username
+                if rst.split('|')[0] == 'OK':
+                    self.current_path = rst.split('|')[1]
                     return True
                 else:
                     print('账号或密码错误，请重新输入或退出（q）..')
@@ -37,7 +37,7 @@ class FtpClient(object):
     def interactive(self):
         if self.authenticate():
             while True:
-                msg = input('%s$' % os.path.basename(self.current_path)).strip()
+                msg = input('%s$' % os.path.basename(self.current_path)).strip().strip('.').strip()
                 msg_info = msg.split(' ')
                 action = msg_info[0]
                 if hasattr(self, action):
@@ -112,7 +112,7 @@ class FtpClient(object):
                     tmp_filesize += 1024
                 f.close()
             else:
-                print('文件不存在或路径错误。。。')
+                print(file_exist)
                 return False
             return True
         else:
@@ -124,10 +124,10 @@ class FtpClient(object):
         if len(args) == 2:
             path = args[1]
             cd_info = 'cd|%s' % path
-            self.client.send(cd_info)
-            cd_flag = self.client.recv(1024)
-            if cd_flag.split('|') == 'OK':
-                self.current_path = path
+            self.client.send(cd_info.encode('utf-8'))
+            cd_flag = self.client.recv(1024).decode('utf-8')
+            if cd_flag.split('|')[0] == 'OK':
+                self.current_path = cd_flag.split('|')[1]
                 return True
             else:
                 print('没有权限或者路劲不存在。。')
@@ -138,10 +138,15 @@ class FtpClient(object):
 
     def ls(self, *args):
         args = args[0]
-        if len(args) == 2:
-            path = args[1]
+        if len(args) == 1:
+            ls_info = 'ls|%s' % self.current_path
+            self.client.send(ls_info.encode('utf-8'))
         else:
-            pass
+            ls_info = 'ls|%s' % args[1]
+            self.client.send(ls_info.encode('utf-8'))
+        rst = self.client.recv(1024).decode('utf-8')
+        print(rst)
+        return rst
 
     def pwd(self, *args):
         print(self.current_path)

@@ -16,7 +16,7 @@ class dbHelper(object):
         if os.path.exists(account_file):
             with open(account_file, 'r') as f:
                 account_data = json.loads(f.read())
-            account_data['home'] = '%s%s' % (settings.BASE_DIR, account_data['home'])
+            # account_data['home'] = '%s%s' % (settings.BASE_DIR, account_data['home'])
             return account_data
         else:
             return False

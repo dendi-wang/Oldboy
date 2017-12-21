@@ -13,5 +13,5 @@ from core import FTPClient
 
 if __name__ == '__main__':
     client = FTPClient.FtpClient()
-    client.connent(('127.0.0.1', 10000))
+    client.connent(('192.168.200.128', 10000))
     client.interactive()
