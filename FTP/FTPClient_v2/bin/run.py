@@ -9,9 +9,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 sys.path.append(BASE_DIR)
 from conf import settings
-from core import FTPClient_v2
+from core import FTPClient
 
 if __name__ == '__main__':
-    client = FTPClient_v2.FtpClient()
+    client = FTPClient.FtpClient()
     client.connent(('127.0.0.1', 10000))
     client.interactive()

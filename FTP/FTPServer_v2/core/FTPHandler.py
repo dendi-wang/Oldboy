@@ -13,7 +13,7 @@ class FTPHandler(socketserver.BaseRequestHandler):
         self.acc_info = None
         self.name = None
         self.mydbHelper = None
-        #self.mydbHelper = dbHelper()
+        # self.mydbHelper = dbHelper()
 
     def handle(self):
         while True:
@@ -33,13 +33,15 @@ class FTPHandler(socketserver.BaseRequestHandler):
         password = msg_data[2]
         self.mydbHelper = dbHelper.dbHelper(username)
         acc_info = self.mydbHelper.get_acc_data()
-        print(acc_info['username'],acc_info['password'])
+        print(acc_info['username'], acc_info['password'])
         if acc_info:
             if username == acc_info['username'] and password == acc_info['password']:
                 if os.path.exists(acc_info['home']):
+                    print('home path 已存在')
                     pass
                 else:
                     os.makedirs(acc_info['home'])
+                    print('创建成功')
                 print('%s登录成功。。。', username)
                 self.acc_info = acc_info
                 self.request.send('OK'.encode('utf-8'))
