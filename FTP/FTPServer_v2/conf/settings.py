@@ -9,3 +9,5 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = '%s/db/account_files' % BASE_DIR
 
 path_separator = '\\'
+
+print(BASE_DIR)

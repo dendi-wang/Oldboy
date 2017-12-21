@@ -11,5 +11,8 @@ acc_dic = {
     'home': '/home/alex',
 }
 
-# f = open('account_files/alex.json', 'w')
-# f.write(json.dumps(acc_dic))
+
+def mod_acc(username, acc_dic):
+    file = 'account_files/%s.json'
+    f = open('account_files/alex.json', 'w')
+    f.write(json.dumps(acc_dic))

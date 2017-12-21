@@ -4,12 +4,13 @@
 
 import os
 import sys
+import socketserver
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 sys.path.append(BASE_DIR)
-from conf import settings
-from core import main
+from core import FTPHandler
 
 if __name__ == '__main__':
-    main.main()
+    server = socketserver.ThreadingTCPServer(('127.0.0.1', 10000), FTPHandler.FTPHandler)
+    server.serve_forever()

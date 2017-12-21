@@ -2,69 +2,147 @@
 # _*_ coding:utf-8 _*_
 # Author: Harvey Wang
 
+import socket
 import os
-import socket, time
 
 from conf import settings
 
 
-class FTPClient(object):
-    def __init__(self, ip_port):
+class FtpClient(object):
+    def __init__(self):
         self.client = socket.socket()
-        self.conn = self.client.connect(ip_port)
+        self.current_path = None
 
-    def auth(self, userInfo):
-        self.client.send(userInfo)
-        rst = self.client.recv(1024)
-        return rst
+    def connent(self, ip_port):
+        self.client.connect(ip_port)
 
-    def download(self, filepath):
-        # conn, addr = self.FTPs.accept()
-        print(filepath)
-        self.client.send(str(filepath).encode('utf-8'))
-        filesize = self.client.recv(1024).decode(encoding='utf-8')
-        filename = os.path.split(filepath)[1]
-        down_path = os.path.join(settings.download_path, filename)
-        flag = True
-        tmp_filesize = 0
-        f = open(down_path, 'wb')
-        print('开始下载文件....')
-        # time.sleep(5)
-        while flag:
-            data = self.client.recv(1024)
-            f.write(data)
-            f.flush()
-            tmp_filesize += len(data)
-            # print(tmp_filesize)
-            if int(filesize) - tmp_filesize == 0:
-                flag = False
-        f.close()
-        return True
+    def authenticate(self):
+        while True:
+            choice = ('''任意键登录，q退出。。。''')
+            if choice != 'q':
+                username = input('username:')
+                password = input('password:')
+                auth_info = 'authenticate|%s|%s' % (username, password)
+                self.client.send(auth_info.encode('utf-8'))
+                rst = self.client.recv(1024).decode('utf-8')
+                if rst == 'OK':
+                    self.current_path = '/home/%s' % username
+                    return True
+                else:
+                    print('账号或密码错误，请重新输入或退出（q）..')
+                    return False
+            else:
+                exit('退出FTP。。。')
 
-    def upload(self, file_path):
-        # conn, addr = self.FTPs.accept()
-        # file_path = self.conn.recv(1024).fileInfo.decode(encoding='utf-8')
-        file_name = os.path.split(file_path)[1]
-        file_size = str(os.path.getsize(file_path))
-        file_info = '%s|%s' % (file_name, file_size)
-        self.client.send(file_info.encode())
-        f = open(file_path, 'rb')
-        tmp_size = 0
-        flag = True
-        print('开始上传文件。。。。')
-        while flag:
-            data = f.read(1024)
-            self.client.send(data)
-            tmp_size += len(data)
-            # print(file_size, tmp_size)
-            if tmp_size == int(file_size):
-                flag = False
+    def interactive(self):
+        if self.authenticate():
+            while True:
+                msg = input('%s$' % os.path.basename(self.current_path)).strip()
+                msg_info = msg.split(' ')
+                action = msg_info[0]
+                if hasattr(self, action):
+                    getattr(self, action)(msg_info)
+                else:
+                    print('非法操作。。。（help）')
+
+    def help(self, *args):
+        print('''
+            help 帮助信息
+            put filename 上传文件
+            get filename 下载文件
+            pwd 当前路径
+            cd path 切换路径
+            ls path 查看文件
+        ''')
+
+    def put(self, *args):
+        args = args[0]
+        if len(args) == 2:
+            topath = self.current_path
+            if len(args) > 1:
+                filepath = args[1]
+                filename = os.path.basename(filepath)
+                if os.path.isfile(filepath):
+                    filesize = len(filepath)
+                    put_info = '''put|%s|%s|%s''' % (filename, topath, str(filesize))
+                    self.client.send(put_info.encode('utf-8'))
+                    flag_quota = self.client.recv(1024).decode('utf-8')
+                    if flag_quota == 'OK':
+                        f = open(filepath, 'rb')
+                        send_size = 0
+                        while send_size <= filesize:
+                            data = f.read(1024)
+                            self.client.send(data)
+                            send_size += 1024
+                        f.close()
+                    else:
+                        print('配额不足。。')
+                        return False
+            else:
+                print('put filename..... or help')
+                return False
+        else:
+            print('输入有误。。。')
+            return False
+
+    def get(self, *args):
+        args = args[0]
+        if len(args) == 2:
+            filename = args[1]
+            filepath = os.path.join(self.current_path, filename)
+            get_info = '''get|%s''' % filepath
+            self.client.send(get_info.encode('utf-8'))
+            file_info = self.client.recv(1024).decode(encoding='utf-8')
+            file_exist = file_info.split('|')[0]
+            filesize = int(file_info.split('|')[1])
+            # filename = os.path.split(filepath)[1]
+            down_path = os.path.join(settings.download_path, filename)
+            if file_exist == 'OK':
+                tmp_filesize = 0
+                f = open(down_path, 'wb')
+                print('开始下载文件....')
+                while tmp_filesize <= filesize:
+                    if filesize - tmp_filesize >= 1024:
+                        recv_size = 1024
+                    else:
+                        recv_size = filesize - tmp_filesize
+                    data = self.client.recv(recv_size)
+                    f.write(data)
+                    f.flush()
+                    tmp_filesize += 1024
                 f.close()
-        return True
+            else:
+                print('文件不存在或路径错误。。。')
+                return False
+            return True
+        else:
+            print('输入有误。。。')
+            return False
 
-    def exec_cmd(self, cmd_user):
-        # conn, addr = self.FTPs.accept()
-        self.client.send(cmd_user.encode('utf-8'))
-        print(cmd_user)
-        data = self.client.recv(1024)
-        print(data.decode(encoding='utf-8'))
+    def cd(self, *args):
+        args = args[0]
+        if len(args) == 2:
+            path = args[1]
+            cd_info = 'cd|%s' % path
+            self.client.send(cd_info)
+            cd_flag = self.client.recv(1024)
+            if cd_flag.split('|') == 'OK':
+                self.current_path = path
+                return True
+            else:
+                print('没有权限或者路劲不存在。。')
+                return False
+        else:
+            print('命令有误。。。')
+            return False
+
+    def ls(self, *args):
+        args = args[0]
+        if len(args) == 2:
+            path = args[1]
+        else:
+            pass
+
+    def pwd(self, *args):
+        print(self.current_path)
+        return True
