@@ -5,14 +5,17 @@
 import json
 
 acc_dic = {
-    'username': 'alex',
-    'password': 'alex',
-    'quota': 15000,
+    'username': 'Harvey',
+    'password': 'Harvey',
+    'quota': 150000,
     'home': '/home/alex',
 }
 
 
-def mod_acc(username, acc_dic):
-    file = 'account_files/%s.json'
-    f = open('account_files/alex.json', 'w')
+def add_user(acc_dic):
+    file = 'account_files/%s.json' % acc_dic['username']
+    f = open(file, 'w')
     f.write(json.dumps(acc_dic))
+
+
+add_user(acc_dic)
