@@ -12,7 +12,7 @@ download_path = '%s/download/' % BASE_DIR
 
 HOSTS = {
     'test': {
-        1: ['192.168.10.44', 22, 'root', 'rethat'],
+        1: ['192.168.10.44', 22, 'root', 'redhat'],
         2: ['192.168.10.220', 22, 'game', 'a123456!']
     },
 
