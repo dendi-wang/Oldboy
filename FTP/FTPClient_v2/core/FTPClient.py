@@ -49,8 +49,8 @@ class FtpClient(object):
     def help(self, *args):
         print('''
             help 帮助信息
-            put filename 上传文件
-            get filename 下载文件
+            put localfile 上传文件
+            get remotefile 下载文件
             pwd 当前路径
             cd path 切换路径
             ls path 查看文件
@@ -101,7 +101,7 @@ class FtpClient(object):
             filepath = os.path.join(self.current_path, filename)
             get_info = '''get|%s''' % filename
             self.client.send(get_info.encode('utf-8'))
-            file_info = self.client.recv(1024).decode(encoding='utf-8')
+            file_info = self.client.recv(1024).decode('utf-8')
             file_exist = file_info.split('|')[0]
             filesize = int(file_info.split('|')[1])
             real_filename = os.path.split(filepath)[1]
@@ -112,7 +112,7 @@ class FtpClient(object):
                 print('开始下载文件....%s,大小%s' % (filename, str(filesize)))
                 count = math.ceil(filesize / 1024)
                 tmp_count = 0
-                while tmp_filesize < filesize:
+                while tmp_filesize != filesize:
                     if filesize - tmp_filesize >= 1024:
                         recv_size = 1024
                     else:
@@ -121,7 +121,7 @@ class FtpClient(object):
                     data = self.client.recv(recv_size)
                     f.write(data)
                     f.flush()
-                    tmp_filesize += 1024
+                    tmp_filesize += len(data)
                     # print('{0}%'.format(str(tmp_filesize/filesize*100)))
                     sys.stdout.write('{0}/{1}\r'.format(tmp_count, count))
                     sys.stdout.flush()

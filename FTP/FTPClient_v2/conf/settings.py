@@ -10,8 +10,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 download_path = '%s/download/' % BASE_DIR
 
-
-
 # plat = platform.system()
 # if plat == 'Windows':
 #     path_separator = '\\'

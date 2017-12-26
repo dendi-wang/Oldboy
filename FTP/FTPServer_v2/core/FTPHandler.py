@@ -60,14 +60,14 @@ class FTPHandler(socketserver.BaseRequestHandler):
         filename = os.path.split(real_file_path)[1]
         if os.path.exists(real_file_path):
             filesize = os.path.getsize(real_file_path)
-            file_info = 'OK|%s' % filesize
+            file_info = 'OK|%s' % str(filesize)
             self.request.send(file_info.encode('utf-8'))
             tmp_filesize = 0
             f = open(real_file_path, 'rb')
-            while tmp_filesize <= filesize:
+            while tmp_filesize != filesize:
                 data = f.read(1024)
                 self.request.send(data)
-                tmp_filesize += 1024
+                tmp_filesize += len(data)
             f.close()
         else:
             self.request.send('file in not exist|0'.encode('utf-8'))
