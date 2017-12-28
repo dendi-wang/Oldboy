@@ -8,4 +8,4 @@ IP_PORT = ('localhost', 10000)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = '%s/db/userInfo.txt' % BASE_DIR
 
-path_separator = '\\'
+ip_port = ('localhost', 10000)

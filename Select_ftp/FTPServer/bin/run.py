@@ -9,7 +9,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 sys.path.append(BASE_DIR)
 from conf import settings
-from core import main
+from core import Select_ftp
 
 if __name__ == '__main__':
-    main.main()
+    ftpServer = Select_ftp.FTPServer()
+    ftpServer.connent(settings.ip_port)
+    ftpServer.interactive()
