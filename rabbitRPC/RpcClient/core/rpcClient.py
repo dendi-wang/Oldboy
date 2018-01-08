@@ -7,6 +7,7 @@
 
 import pika
 import uuid
+import threading
 
 
 class RPCClient(object):
@@ -20,6 +21,7 @@ class RPCClient(object):
         self.callback_queue = result.method.queue
         self.channel.basic_consume(self.on_response, no_ack=True,
                                    queue=self.callback_queue)
+        # self.channel.start_consuming()
 
     def on_response(self, ch, method, props, body):
         if self.corr_id == props.correlation_id:
@@ -45,7 +47,15 @@ class RPCClient(object):
                                            correlation_id=self.corr_id,
                                        ),
                                        body=cmd)
-            self.conn.process_data_events(time_limit=5)
+            t = threading.Thread(target=self.judge_response, args=(host, self.task_id))
+            t.setDaemon(True)
+            t.start()
+            # self.conn.process_data_events(time_limit=60)
+
+    def judge_response(self, host, task_id):
+        self.conn.process_data_events(time_limit=60)
+        if self.response == None:
+            self.recv_data[task_id][host] = '此主机失去连接。。'
 
     # def break_loop(self, host):
     #     self.response = '%s 失去连接。。' % host
@@ -54,7 +64,6 @@ class RPCClient(object):
         for host, data in self.recv_data.get(int(id)).items():
             print('''%s:
             %s''' % (host, data))
-
 
     def interactive(self):
         flag = True
