@@ -4,7 +4,7 @@
 import os
 import platform
 
-RABBITMQ_HOST = '192.168.10.44'
+RABBITMQ_HOST = '192.168.31.26'
 
 RABBITMQ_PORT = 5672
 
