@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>hosts</title>
+    <link href="/static/css/bootstrap.css" rel="stylesheet"/>
+    <link href="/static/css/bootstrap-theme.min.css" rel="stylesheet"/>
+    <style>
+        a:focus {
+            color: #fff !important;
+            background-color: #9acfea !important;
+        }
+
+    </style>
+</head>
+<body>
+<div style="width: 100%;margin:0 auto;background: black;height: 40px"></div>
+<div style="width: 100%;margin: 0 auto">
+    <div style="width: 250px;margin-top: 47px;margin-left:45px;position: absolute;float: left">
+        <div>
+            <ul class="nav nav-pills nav-stacked">
+                <li role="presentation" class="active"><a href="#">主机管理</a></li>
+                <li role="presentation"><a href="#">CMDB</a></li>
+                <li role="presentation"><a href="#">资产管理</a></li>
+                <li role="presentation"><a href="#">发布系统</a></li>
+                <li role="presentation"><a href="#">数据平台</a></li>
+            </ul>
+        </div>
+    </div>
+    <div style="width: 60%;position:absolute;float: left;margin-left: 400px;margin-top: 47px">
+        <div>
+            <button type="button" data-toggle="modal" data-target="#myModal">
+                添加
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">添加主机</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="/addhost/" method="post" id="mod_form">
+                                <p>
+                                    <input id="nid" name="nid" type="text" style="display: none"/>
+                                </p>
+                                <p>
+                                    <label for="ip" style="width: 80px">ip：</label>
+                                    <input id="ip" name="ip" type="text"/>
+                                </p>
+                                <p>
+                                    <label for="hostname" style="width: 80px">hostname：</label>
+                                    <input id="hostname" name="hostname" type="text"/>
+                                </p>
+                                <p>
+                                    <label for="port" style="width: 80px">port：</label>
+                                    <input id="port" name="port" type="text"/>
+                                    <span style="color: red;">{{ error_msg }}</span>
+                                </p>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="cal">取消</button>
+                                    <button type="submit" class="btn btn-primary">确定</button>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="border: 1px solid gainsboro ;margin-top: 10px" id="host_form">
+            <table class="table table-hover table-condensed" id="host_list">
+                <thead>
+                <tr>
+                    <th>id</th>
+                    <th>hostname</th>
+                    <th>port</th>
+                    <th>ip</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for host in host_list %}
+
+                    <tr nid={{ host.id }}>
+                        <td>{{ forloop.counter }}</td>
+                        <td hostname="hostname">{{ host.hostname }}</td>
+                        <td port="port">{{ host.port }}</td>
+                        <td ip="ip">{{ host.ip }}</td>
+                        <td>
+                            {#                            <input type="button" value="删除" style="display: inline-block;margin-right: 10px">#}
+                            {#                            <input type="button" value="修改">#}
+                            <button type="button" data-toggle="hhh" data-target="" onclick="del()">
+                                删除
+                            </button>
+                            <button type="button" data-toggle="modal" data-target="#myModal" onclick="mod(this)">
+                                修改
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+<script src="/static/js/jquery-1.12.4.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script>
+    $("#cal").click(function(){
+        $("h4").text("添加主机");
+    });
+    function del(obj) {
+        $("#nid").val($(obj).parent().parent().attr("nid"));
+        alert('11111');
+        console.log(1111111111111111)
+    }
+    function mod(obj) {
+        $("#mod_form").attr("action",'/modhost/');
+        $("h4").text("修改主机");
+        console.log($(obj).parent().parent().attr("nid"));
+        $("#nid").val($(obj).parent().parent().attr("nid"));
+        $(obj).parent().siblings().each(function () {
+            var tmp = $(this).text();
+            var arry = ['hostname', 'port', 'ip'];
+            for (var i = 0; i < 3; i++) {
+                if ($(this).attr(arry[i])) {
+                    var html_id = "#" + arry[i];
+                    $(html_id).val(tmp);
+                    console.log(html_id, tmp)
+                }
+
+            }
+        });
+    }
+</script>
+</body>
+</html>
