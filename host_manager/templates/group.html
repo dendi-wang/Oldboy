@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>hosts</title>
+    <link href="/static/css/bootstrap.css" rel="stylesheet"/>
+    <link href="/static/css/bootstrap-theme.min.css" rel="stylesheet"/>
+    <style>
+        a:focus {
+            color: #fff !important;
+            background-color: #9acfea !important;
+        }
+
+        .hide {
+            display: none;
+        !important;
+        }
+
+        .child_mune a {
+            font-size: 12px;
+            color: black;
+        !important;
+        }
+
+    </style>
+</head>
+<body>
+  {% include 'mune.html' %}
+  <div style="width: 60%;position:absolute;float: left;margin-left: 400px;margin-top: 47px">
+        <div>
+            <button type="button" data-toggle="modal" data-target="#myModal">
+                添加
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">修改分组</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="/mod/" method="post" id="mod_form">
+                                <p>
+                                    <input id="nid" name="nid" type="text" style="display: none"/>
+                                </p>
+                                <p>
+                                    <label for="ip" style="width: 80px">ip：</label>
+                                    <input id="ip" name="ip" type="text"/>
+                                </p>
+                                <p>
+                                    <label for="hostname" style="width: 80px">hostname：</label>
+                                    <input id="hostname" name="hostname" type="text"/>
+                                </p>
+                                <p>
+                                    <label for="port" style="width: 80px">port：</label>
+                                    <input id="port" name="port" type="text"/>
+                                </p>
+{#                                <p>#}
+{#                                    <label for="group" style="width: 80px">group：</label>#}
+{#                                    <input id="group" name="group" type="text"/>#}
+{#                                </p>#}
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="cal">取消
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">确定</button>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="border: 1px solid gainsboro ;margin-top: 10px" id="host_form">
+            <table class="table table-hover table-condensed" id="host_list">
+                <thead>
+                <tr>
+                    <th>id</th>
+                    <th>ip</th>
+                    <th>group</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for host in host_list %}
+
+                    <tr nid={{ host.nid }}>
+                        <td>{{ forloop.counter }}</td>
+                        <td hostname="hostname">{{ host.hostname }}</td>
+                        <td ip="ip">{{ host.ip }}</td>
+                        <td group="group">
+                        {% for group in host.group.all %}
+                            <span style="margin:0">{{ group.groupname }}</span>
+                         {% endfor %}
+                        </td>
+                        <td>
+                            {#                            <input type="button" value="删除" style="display: inline-block;margin-right: 10px">#}
+                            {#                            <input type="button" value="修改">#}
+                            <button type="button" data-toggle="#" data-target="#" onclick="del(this)">
+                                删除
+                            </button>
+                            <button type="button" data-toggle="modal" data-target="#myModal" onclick="mod(this)">
+                                修改
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<script src="/static/js/jquery-1.12.4.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script>
+    function ChangeMenu(obj) {
+        $(obj).children('ul').removeClass('hide');
+        $(obj).siblings().children('ul').addClass('hide');
+    }
+    (function () {
+        $("#main_mune ul").addClass("nav nav-pills nav-stacked")
+    }());
+    $("#cal").click(function () {
+        $("h4").text("添加主机");
+        $("#mod_form input").val('')
+    });
+    function del(obj) {
+        var nid = $(obj).parent().parent().attr("nid");
+        var hostname = $(obj).parent().siblings().text()[1];
+        var v = confirm('确定删除:' + hostname);
+        if (v) {
+            $.ajax({
+                url: "/delhost/",
+                type: "POST",
+                data: {'nid': nid},
+                dataType:'json',
+                success: function (data) {
+                    $(obj).parent().parent().remove();
+                    console.log('删除成功'+data)
+                },
+                error: function (data) {
+                    alert('删除失败'+data)
+                }
+            })
+        }
+    }
+    function mod(obj) {
+        $("#mod_form").attr("action", '/modhost/');
+        $("h4").text("修改主机");
+        $("#nid").val($(obj).parent().parent().attr("nid"));
+        $(obj).parent().siblings().each(function () {
+            var tmp = $(this).text().trim().replace(/(\s+)|(\s+)/g, " ");
+            console.log(tmp);
+            var arry = ['hostname', 'port', 'ip'];
+            for (var i = 0; i < arry.length; i++) {
+                if ($(this).attr(arry[i])) {
+                    var html_id = "#" + arry[i];
+                    $(html_id).val(tmp);
+                }
+
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

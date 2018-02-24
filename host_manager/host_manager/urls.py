@@ -15,14 +15,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from Hostmanager.views import hosts, index, addhost, delhost, modhost,login
+from django.conf.urls import url
+from Hostmanager.views import hosts, index, addhost, delhost, modhost, login, managerGroup, modGroup
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', login),
-    path('hosts/', hosts),
-    path('index/', index),
+    path('hosts.html', hosts),
+    path('index.html', index),
     path('addhost/', addhost),
     path('delhost/', delhost),
     path('modhost/', modhost),
+    path('modGroup/', modGroup),
+    path('managerGroup.html', managerGroup),
+    url(r'^index.html$', index),
 ]

@@ -11,23 +11,22 @@
             background-color: #9acfea !important;
         }
 
+        .hide {
+            display: none;
+        !important;
+        }
+
+        .child_mune a {
+            font-size: 12px;
+            color: black;
+        !important;
+        }
+
     </style>
 </head>
 <body>
-<div style="width: 100%;margin:0 auto;background: black;height: 40px"></div>
-<div style="width: 100%;margin: 0 auto">
-    <div style="width: 250px;margin-top: 47px;margin-left:45px;position: absolute;float: left">
-        <div>
-            <ul class="nav nav-pills nav-stacked">
-                <li role="presentation" class="active"><a href="#">主机管理</a></li>
-                <li role="presentation"><a href="#">CMDB</a></li>
-                <li role="presentation"><a href="#">资产管理</a></li>
-                <li role="presentation"><a href="#">发布系统</a></li>
-                <li role="presentation"><a href="#">数据平台</a></li>
-            </ul>
-        </div>
-    </div>
-    <div style="width: 60%;position:absolute;float: left;margin-left: 400px;margin-top: 47px">
+  {% include 'mune.html' %}
+  <div style="width: 60%;position:absolute;float: left;margin-left: 400px;margin-top: 47px">
         <div>
             <button type="button" data-toggle="modal" data-target="#myModal">
                 添加
@@ -58,10 +57,14 @@
                                 <p>
                                     <label for="port" style="width: 80px">port：</label>
                                     <input id="port" name="port" type="text"/>
-                                    <span style="color: red;">{{ error_msg }}</span>
                                 </p>
+{#                                <p>#}
+{#                                    <label for="group" style="width: 80px">group：</label>#}
+{#                                    <input id="group" name="group" type="text"/>#}
+{#                                </p>#}
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="cal">取消</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal" id="cal">取消
+                                    </button>
                                     <button type="submit" class="btn btn-primary">确定</button>
                                 </div>
                             </form>
@@ -79,21 +82,27 @@
                     <th>hostname</th>
                     <th>port</th>
                     <th>ip</th>
+                    <th>group</th>
                     <th>操作</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for host in host_list %}
 
-                    <tr nid={{ host.id }}>
+                    <tr nid={{ host.nid }}>
                         <td>{{ forloop.counter }}</td>
                         <td hostname="hostname">{{ host.hostname }}</td>
                         <td port="port">{{ host.port }}</td>
                         <td ip="ip">{{ host.ip }}</td>
+                        <td group="group">
+                        {% for group in host.group.all %}
+                            <span style="margin:0">{{ group.groupname }}</span>
+                         {% endfor %}
+                        </td>
                         <td>
                             {#                            <input type="button" value="删除" style="display: inline-block;margin-right: 10px">#}
                             {#                            <input type="button" value="修改">#}
-                            <button type="button" data-toggle="hhh" data-target="" onclick="del()">
+                            <button type="button" data-toggle="#" data-target="#" onclick="del(this)">
                                 删除
                             </button>
                             <button type="button" data-toggle="modal" data-target="#myModal" onclick="mod(this)">
@@ -107,36 +116,58 @@
         </div>
     </div>
 
-</div>
 <script src="/static/js/jquery-1.12.4.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
 <script>
-    $("#cal").click(function(){
+    function ChangeMenu(obj) {
+        $(obj).children('ul').removeClass('hide');
+        $(obj).siblings().children('ul').addClass('hide');
+    }
+    (function () {
+        $("#main_mune ul").addClass("nav nav-pills nav-stacked")
+    }());
+    $("#cal").click(function () {
         $("h4").text("添加主机");
+        $("#mod_form input").val('')
     });
     function del(obj) {
-        $("#nid").val($(obj).parent().parent().attr("nid"));
-        alert('11111');
-        console.log(1111111111111111)
+        var nid = $(obj).parent().parent().attr("nid");
+        var hostname = $(obj).parent().siblings().text()[1];
+        var v = confirm('确定删除:' + hostname);
+        if (v) {
+            $.ajax({
+                url: "/delhost/",
+                type: "POST",
+                data: {'nid': nid},
+                dataType:'json',
+                success: function (data) {
+                    $(obj).parent().parent().remove();
+                    console.log('删除成功'+data)
+                },
+                error: function (data) {
+                    alert('删除失败'+data)
+                }
+            })
+        }
     }
     function mod(obj) {
-        $("#mod_form").attr("action",'/modhost/');
+        $("#mod_form").attr("action", '/modhost/');
         $("h4").text("修改主机");
-        console.log($(obj).parent().parent().attr("nid"));
         $("#nid").val($(obj).parent().parent().attr("nid"));
         $(obj).parent().siblings().each(function () {
-            var tmp = $(this).text();
+            var tmp = $(this).text().trim().replace(/(\s+)|(\s+)/g, " ");
+            console.log(tmp);
             var arry = ['hostname', 'port', 'ip'];
-            for (var i = 0; i < 3; i++) {
+            for (var i = 0; i < arry.length; i++) {
                 if ($(this).attr(arry[i])) {
                     var html_id = "#" + arry[i];
                     $(html_id).val(tmp);
-                    console.log(html_id, tmp)
                 }
 
             }
         });
     }
+
 </script>
 </body>
 </html>

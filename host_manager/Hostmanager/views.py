@@ -10,7 +10,7 @@ import json
 
 
 def login(request):
-    pass
+    return render(request, 'login.html')
 
 
 # host_list = [{
@@ -78,10 +78,12 @@ def modhost(request):
         Hosts.objects.filter(nid=nid).update(**tmp)
     return redirect('/hosts/')
 
+
 def managerGroup(request):
     group = Group.objects.all()
 
     return render(request, 'group.html', {'host_list': group})
+
 
 def addGroup(request):
     pass
